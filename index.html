@@ -92,23 +92,11 @@ menu.selectAll("option")
   .enter().append("option")
     .text(function(d) { return d.name; });
 
-function change() {
-  update(options[this.selectedIndex]);
-}
-
 var i = 0,
-    n = options.length - 1;
+    n = options.length,
+    projection;
 
-rando();
-
-var projection = options[i].projection;
-
-options.forEach(function(option) {
-  option.projection
-      .translate([width / 2, height / 2])
-      .scale(option.projection.scale() * ratio)
-      .clipExtent([[2 * ratio, 2 * ratio], [width - 2 * ratio, height - 2 * ratio]]);
-});
+setInitialProjection();
 
 var graticule = d3.geo.graticule()(),
     face,
@@ -127,12 +115,6 @@ context.strokeStyle = "#000";
 var path = d3.geo.path()
     .projection(projection)
     .context(context);
-
-function rando() {
-  var j = Math.floor(Math.random() * n);
-  i = j + (j >= i);
-  menu.property("selectedIndex", i = j + (j >= i));
-}
 
 function change() {
   update(options[this.selectedIndex]);
@@ -163,6 +145,18 @@ function update(option) {
       .ease( d3.ease("quad") )
       .tween("path", pathTween(projection, projection = option.projection));
   path.projection(projection);
+}
+
+function setInitialProjection() {
+  var initialIndex = options.findIndex(function(option) {
+    return option.name.indexOf("正距円筒図法（Equirectangular") === 0;
+  });
+
+  if (initialIndex === -1) initialIndex = 0;
+
+  menu.property("selectedIndex", initialIndex);
+  projection = options[initialIndex].projection;
+  update(options[initialIndex]);
 }
 
 function redraw(path) {
