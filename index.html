@@ -92,11 +92,14 @@ menu.selectAll("option")
   .enter().append("option")
     .text(function(d) { return d.name; });
 
-var i = 0,
-    n = options.length,
-    projection;
+var projection = options[0].projection;
 
-setInitialProjection();
+options.forEach(function(option) {
+  option.projection
+      .translate([width / 2, height / 2])
+      .scale(option.projection.scale() * ratio)
+      .clipExtent([[2 * ratio, 2 * ratio], [width - 2 * ratio, height - 2 * ratio]]);
+});
 
 var graticule = d3.geo.graticule()(),
     face,
@@ -115,6 +118,8 @@ context.strokeStyle = "#000";
 var path = d3.geo.path()
     .projection(projection)
     .context(context);
+
+setInitialProjection();
 
 function change() {
   update(options[this.selectedIndex]);
